@@ -1,0 +1,224 @@
+/* Importa a fonte do Google */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
+
+/* Configurações Globais e Fundo */
+:root {
+  --primary-color: #6a5af9;
+  --secondary-color: #d66bff;
+  --bg-gradient: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--secondary-color) 100%
+  );
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: var(--bg-gradient);
+  color: #444;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Estrutura */
+.main-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  animation: slideUp 0.6s ease-out forwards;
+}
+.card-title {
+  text-align: center;
+  margin: 0 0 10px 0;
+  color: #333;
+  font-weight: 700;
+}
+.card-subtitle {
+  text-align: center;
+  margin: 0 0 25px 0;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Formulário */
+input,
+select {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.2s ease;
+}
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(106, 90, 249, 0.3);
+}
+
+/* Botões */
+button {
+  width: 100%;
+  padding: 15px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+#submitButton {
+  background: var(--bg-gradient);
+}
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Lista de Nomes */
+#listaNomes h3 {
+  margin: 25px 0 10px 0;
+  color: #333;
+  font-size: 1.1rem;
+  text-align: left;
+}
+#listaNomes .list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin: 8px 0;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+.delete-btn {
+  font-size: 1rem;
+  background: none;
+  color: #ff5c5c;
+  width: auto;
+  padding: 5px;
+  opacity: 0.7;
+}
+.delete-btn:hover {
+  opacity: 1;
+  color: #e10000;
+  transform: scale(1.1);
+  box-shadow: none;
+}
+.empty-state {
+  text-align: center;
+  color: #999;
+  padding: 20px 0;
+}
+
+/* Painel de Admin */
+.admin-card {
+  background: #f7f7ff;
+  border: 1px solid #e0e0ff;
+}
+#generate-report-btn {
+  background: #6c757d;
+  border-bottom: 3px solid #5a6268;
+}
+#generate-report-btn:hover {
+  background: #5a6268;
+}
+
+/* Modais (Janelas Pop-up) */
+#delete-modal-overlay,
+#report-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  animation: slideUp 0.4s ease-out forwards;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+#cancel-delete-btn,
+#cancel-report-btn {
+  background: #eee;
+  color: #555;
+}
+#confirm-delete-btn {
+  background-color: #ff5c5c;
+}
+#confirm-report-btn {
+  background-color: #28a745;
+}
+
+/* Mensagens de Feedback */
+.message-success,
+.message-error {
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-weight: 600;
+}
+.message-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+.message-error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+.hidden {
+  display: none !important;
+}
+
+/* Animações */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
