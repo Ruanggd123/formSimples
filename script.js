@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // !! ATUALIZE AQUI COM A URL DO SEU DEPLOY (confirme que é a mais recente) !!
   const SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbydSZdJxMjJIlYEtq9VzxyGuYb86bAo35swbM3B08gvChGUpCHVspiI-LoXGLqxoeGS/exec";
+    "https://script.google.com/macros/s/AKfycbyslFGbdD_dwsx693RvfULTH3PAPv-MdOzEREjVd2n0v49C1WOReNiYhdXn91Doe4HE/exec";
   const LIST_LIMIT = 46;
 
   // DOM
@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalNomesSpan = document.getElementById("totalNomes");
   const subirCountSpan = document.getElementById("subirCount");
   const descerCountSpan = document.getElementById("descerCount");
+
+  // NOVO: Seleção dos botões de toggle
+  const toggleListBtns = document.querySelectorAll(".toggle-list-btn");
 
   // Admin modals
   const generateReportBtn = document.getElementById("generate-report-btn");
@@ -31,7 +34,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelReportBtn = document.getElementById("cancel-report-btn");
   const confirmReportBtn = document.getElementById("confirm-report-btn");
 
-  // Util: mensagens
+  // --- Funções de Modal (Corrigidas para usar 'hidden') ---
+
+  function openDeleteModal() {
+    deleteModalOverlay.classList.remove("hidden");
+    deleteAdminCodeInput.focus();
+  }
+
+  function closeDeleteModal() {
+    deleteModalOverlay.classList.add("hidden");
+    deleteAdminCodeInput.value = "";
+    idToDelete = null;
+    confirmDeleteBtn.disabled = false;
+    confirmDeleteBtn.textContent = "Deletar";
+  }
+
+  function openReportModal() {
+    reportModalOverlay.classList.remove("hidden");
+    reportAdminCodeInput.focus();
+  }
+
+  function closeReportModal() {
+    reportModalOverlay.classList.add("hidden");
+    reportAdminCodeInput.value = "";
+  }
+
+  // --- Funções de Utilidade e Renderização ---
+
   function showMessage(text, type = "info") {
     message.textContent = text;
     message.className =
@@ -40,85 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
         : type === "error"
         ? "message-error"
         : "";
-    console.log("[UI] " + text);
     setTimeout(() => {
       message.textContent = "";
       message.className = "";
     }, 5000);
   }
 
-  // Carrega lista -> agora com cacheBust e logs
-  async function carregarLista() {
-    try {
-      const url = SCRIPT_URL + "?cacheBust=" + new Date().getTime();
-      const res = await fetch(url, { method: "GET", cache: "no-store" });
-      if (!res.ok) {
-        throw new Error(
-          "Resposta do servidor: " + res.status + " " + res.statusText
-        );
-      }
-      const data = await res.json();
-      console.log("[carregarLista] dados:", data);
-      listaNomesDiv.innerHTML = "";
-      totalNomesSpan.textContent = data.length || 0;
-
-      if (!Array.isArray(data) || data.length === 0) {
-        listaNomesDiv.innerHTML =
-          '<p class="empty-state">Nenhum nome na lista ainda.</p>';
-        return;
-      }
-
-      // separar subir/descer
-      const subir = data.filter(
-        (item) => (item.acao || "").toString().trim().toLowerCase() === "subir"
-      );
-      const descer = data.filter(
-        (item) => (item.acao || "").toString().trim().toLowerCase() === "descer"
-      );
-
-      // Exibe a contagem
-      subirCountSpan.textContent = subir.length;
-      descerCountSpan.textContent = descer.length;
-
-      const renderList = (title, items) => {
-        if (items.length === 0) return;
-        const container = document.createElement("div");
-        const h = document.createElement("h3");
-        h.innerText = `${title} (${items.length})`;
-        container.appendChild(h);
-        items.forEach((item) => {
-          const div = document.createElement("div");
-          div.className = "list-item";
-          // nome em bold e local
-          const span = document.createElement("span");
-          // CORREÇÃO: Converte explicitamente para string para evitar o erro
-          span.innerHTML = `<strong>${escapeHtml(
-            String(item.nome || "")
-          )}</strong> - ${escapeHtml(String(item.local || ""))}`;
-          const btn = document.createElement("button");
-          btn.className = "delete-btn";
-          btn.title = "Deletar";
-          btn.dataset.id = item.id;
-          btn.innerText = "🗑️";
-          btn.addEventListener("click", handleDeleteClick);
-          div.appendChild(span);
-          div.appendChild(btn);
-          container.appendChild(div);
-        });
-        listaNomesDiv.appendChild(container);
-      };
-
-      renderList("🔼 Vai Subir", subir);
-      renderList("🔽 Vai Descer", descer);
-    } catch (err) {
-      console.error("[carregarLista] erro:", err);
-      listaNomesDiv.innerHTML =
-        '<p class="empty-state">Erro ao carregar a lista.</p>';
-      showMessage("Erro ao carregar lista: " + err.message, "error");
-    }
-  }
-
-  // Evita injection (simples)
   function escapeHtml(s) {
     if (!s) return "";
     return s.replace(/[&<>"'`=\/]/g, function (c) {
@@ -134,11 +90,114 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Submit do form (adicionar nome)
+  async function carregarLista() {
+    try {
+      const url = SCRIPT_URL + "?cacheBust=" + new Date().getTime();
+      const res = await fetch(url, { method: "GET", cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(
+          "Resposta do servidor: " + res.status + " " + res.statusText
+        );
+      }
+      const data = await res.json();
+      listaNomesDiv.innerHTML = "";
+      totalNomesSpan.textContent = data.length || 0;
+
+      if (!Array.isArray(data) || data.length === 0) {
+        listaNomesDiv.innerHTML =
+          '<p class="empty-state">Nenhum nome na lista ainda.</p>';
+        return;
+      }
+
+      const subir = data.filter(
+        (item) => (item.acao || "").toString().trim().toLowerCase() === "subir"
+      );
+      const descer = data.filter(
+        (item) => (item.acao || "").toString().trim().toLowerCase() === "descer"
+      );
+
+      subirCountSpan.textContent = subir.length;
+      descerCountSpan.textContent = descer.length;
+
+      const renderList = (title, items, icon, listType) => {
+        if (items.length === 0) return;
+        const container = document.createElement("div");
+        container.classList.add("list-group");
+        container.dataset.listType = listType;
+
+        const isHidden =
+          localStorage.getItem(`list-${listType}-hidden`) === "true";
+        if (isHidden) {
+          container.classList.add("hidden");
+        }
+
+        const h = document.createElement("h3");
+        h.innerHTML = `${icon} ${title}`;
+        container.appendChild(h);
+
+        items.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "list-item";
+
+          const span = document.createElement("span");
+          // Formatação do nome mais bonito e forte
+          span.innerHTML = `<strong>${escapeHtml(
+            String(item.nome || "")
+          )}</strong> - ${escapeHtml(String(item.local || ""))}`;
+
+          const btn = document.createElement("button");
+          btn.className = "delete-btn";
+          btn.title = "Deletar";
+          btn.dataset.id = item.id;
+          btn.innerText = "🗑️";
+          btn.addEventListener("click", handleDeleteClick);
+
+          div.appendChild(span);
+          div.appendChild(btn);
+          container.appendChild(div);
+        });
+        listaNomesDiv.appendChild(container);
+
+        // Atualiza o texto do botão de toggle correspondente
+        const btn = document.querySelector(
+          `.toggle-list-btn[data-list="${listType}"]`
+        );
+        if (btn) {
+          btn.textContent = isHidden ? "Mostrar" : "Esconder";
+        }
+      };
+
+      renderList("Passageiros Subindo", subir, "🔼", "subir");
+      renderList("Passageiros Descendo", descer, "🔽", "descer");
+    } catch (err) {
+      console.error("[carregarLista] erro:", err);
+      listaNomesDiv.innerHTML =
+        '<p class="empty-state">Erro ao carregar a lista.</p>';
+      showMessage("Erro ao carregar lista: " + err.message, "error");
+    }
+  }
+
+  // --- Função de Toggle (Esconder/Mostrar) ---
+
+  const handleToggleList = (event) => {
+    const listType = event.currentTarget.dataset.list;
+    const listContainer = document.querySelector(
+      `[data-list-type="${listType}"]`
+    );
+    if (!listContainer) return;
+
+    listContainer.classList.toggle("hidden");
+    const isHidden = listContainer.classList.contains("hidden");
+
+    localStorage.setItem(`list-${listType}-hidden`, isHidden);
+    event.currentTarget.textContent = isHidden ? "Mostrar" : "Esconder";
+  };
+
+  // --- Funções de Eventos ---
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Valida presença de inputs esperados
     const nomeInput = form.querySelector('[name="nome"]');
     const acaoInput = form.querySelector('[name="acao"]');
     const localInput = form.querySelector('[name="local"]');
@@ -148,11 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "Erro: inputs do formulário devem ter name='nome', name='acao', name='local'.",
         "error"
       );
-      console.error("Form inputs faltando. Verifique o HTML.");
       return;
     }
 
-    // simples validação
     const nomeVal = nomeInput.value.trim();
     const acaoVal = acaoInput.value.trim();
     if (!nomeVal) {
@@ -160,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // VERIFICAÇÃO DE LIMITE AQUI
+    // VERIFICAÇÃO DE LIMITE
     const subirCount = parseInt(subirCountSpan.textContent);
     const descerCount = parseInt(descerCountSpan.textContent);
 
@@ -194,34 +251,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const formData = new FormData();
-      // IMPORTANT: o Apps Script espera nome, acao, local (uso exatamente esses nomes)
       formData.append("nome", nomeVal);
       formData.append("acao", acaoVal);
       formData.append("local", localInput.value.trim());
-      // action diferente do 'delete' faz o append normal no server
       formData.append("action", "add");
 
       const res = await fetch(SCRIPT_URL, { method: "POST", body: formData });
-      // tenta tratar JSON, mas se não for JSON pega texto
       const contentType = res.headers.get("content-type") || "";
       const payload =
         contentType.indexOf("application/json") !== -1
           ? await res.json()
           : await res.text();
 
-      console.log("[submit] resposta:", payload);
-
       if (typeof payload === "object" && payload.status === "success") {
         showMessage("Nome adicionado com sucesso!", "success");
         form.reset();
         await carregarLista();
-      } else if (
-        typeof payload === "object" &&
-        payload.status === "limit_reached"
-      ) {
-        showMessage("Limite de nomes atingido!", "error");
       } else {
-        // se payload for texto, mostra no UI
         showMessage(
           "Erro ao enviar: " +
             (payload.message || payload || "resposta inesperada"),
@@ -244,8 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showMessage("ID não encontrado para deletar.", "error");
       return;
     }
-    deleteModalOverlay.classList.remove("hidden");
-    deleteAdminCodeInput.focus();
+    openDeleteModal(); // <--- CHAMA FUNÇÃO DE ABRIR MODAL
   }
 
   async function confirmDelete() {
@@ -271,8 +316,6 @@ document.addEventListener("DOMContentLoaded", () => {
           ? await res.json()
           : await res.text();
 
-      console.log("[confirmDelete] resposta:", payload);
-
       if (typeof payload === "object" && payload.status === "deleted") {
         showMessage("Nome deletado com sucesso!", "success");
         await carregarLista();
@@ -292,14 +335,13 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("[confirmDelete] erro:", err);
       showMessage("Erro de conexão ao deletar.", "error");
     } finally {
-      closeDeleteModal();
+      closeDeleteModal(); // <--- CHAMA FUNÇÃO DE FECHAR MODAL
     }
   }
 
-  // Generate report (abre em nova aba)
+  // Generate report
   function handleGenerateReportClick() {
-    reportModalOverlay.classList.remove("hidden");
-    reportAdminCodeInput.focus();
+    openReportModal(); // <--- CHAMA FUNÇÃO DE ABRIR MODAL
   }
 
   function confirmGenerateReport() {
@@ -311,30 +353,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const reportType = document.querySelector(
       'input[name="reportType"]:checked'
     ).value;
+
+    // O Apps Script foi ajustado para fazer o download direto
     const downloadUrl = `${SCRIPT_URL}?action=downloadReport&type=${reportType}&adminCode=${encodeURIComponent(
       adminCode
     )}`;
     window.open(downloadUrl, "_blank");
-    closeReportModal();
-  }
-
-  function closeDeleteModal() {
-    deleteModalOverlay.classList.add("hidden");
-    deleteAdminCodeInput.value = "";
-    idToDelete = null;
-    confirmDeleteBtn.disabled = false;
-    confirmDeleteBtn.textContent = "Deletar";
-  }
-
-  function closeReportModal() {
-    reportModalOverlay.classList.add("hidden");
-    reportAdminCodeInput.value = "";
+    closeReportModal(); // <--- CHAMA FUNÇÃO DE FECHAR MODAL
   }
 
   function checkTime() {
     const now = new Date();
     const hour = now.getHours();
-    const isOpen = hour >= 13 && hour < 20;
+    const isOpen = hour >= 13 && hour < 21;
     if (isOpen) {
       form.classList.remove("hidden");
       closedMessage.classList.add("hidden");
@@ -344,12 +375,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // --- Inicialização e Handlers ---
+
   // event handlers
   cancelDeleteBtn.addEventListener("click", closeDeleteModal);
   confirmDeleteBtn.addEventListener("click", confirmDelete);
   generateReportBtn.addEventListener("click", handleGenerateReportClick);
   cancelReportBtn.addEventListener("click", closeReportModal);
   confirmReportBtn.addEventListener("click", confirmGenerateReport);
+
+  // Handlers para os botões de toggle (NOVO)
+  toggleListBtns.forEach((btn) =>
+    btn.addEventListener("click", handleToggleList)
+  );
 
   // inicial
   checkTime();

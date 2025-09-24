@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lista Diária ✨</title>
+    <title>Lista Diária | Transporte 🚌</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
       rel="stylesheet"
@@ -13,8 +13,11 @@
   <body>
     <main class="main-container">
       <div class="card form-card">
-        <h1 class="card-title">Formulário Diário</h1>
-        <p class="card-subtitle">Aberto somente em horário determinado.</p>
+        <h1 class="card-title">Inscrição de Hoje</h1>
+        <p class="card-subtitle">
+          Registre sua ação. Limite de 46 vagas por lista.
+        </p>
+
         <form id="nameForm" class="hidden">
           <input
             type="text"
@@ -31,11 +34,14 @@
           <input
             type="text"
             name="local"
-            placeholder="Qual o local?"
+            placeholder="Qual o local? (Ex: Bloco A, Sala 3)"
             required
           />
-          <button type="submit" id="submitButton">Adicionar à Lista</button>
+          <button type="submit" id="submitButton" class="primary-btn">
+            Adicionar à Lista
+          </button>
         </form>
+
         <div id="message"></div>
         <div id="closedMessage" class="hidden">
           <p>O formulário está fechado.</p>
@@ -43,13 +49,34 @@
       </div>
 
       <div class="card list-card">
-        <h2 class="card-title">
-          Lista de Hoje (<span id="totalNomes">0</span>)
-        </h2>
-        <div class="list-stats">
-          <p>Subindo: <span id="subirCount">0</span></p>
-          <p>Descendo: <span id="descerCount">0</span></p>
+        <div class="list-header">
+          <h2 class="card-title">
+            Lista de Hoje (<span id="totalNomes">0</span>)
+          </h2>
+          <div class="bus-icon">🚌</div>
         </div>
+
+        <div class="list-stats">
+          <div class="stat-card up">
+            <div class="stat-label">Passageiros Subindo</div>
+            <div class="stat-value">
+              <span id="subirCount">0</span>
+            </div>
+            <button class="toggle-list-btn secondary-btn" data-list="subir">
+              Esconder
+            </button>
+          </div>
+          <div class="stat-card down">
+            <div class="stat-label">Passageiros Descendo</div>
+            <div class="stat-value">
+              <span id="descerCount">0</span>
+            </div>
+            <button class="toggle-list-btn secondary-btn" data-list="descer">
+              Esconder
+            </button>
+          </div>
+        </div>
+
         <div id="listaNomes">
           <p class="empty-state">Carregando lista...</p>
         </div>
@@ -57,11 +84,46 @@
 
       <div class="card admin-card">
         <h2 class="card-title">Painel do Administrador</h2>
-        <button id="generate-report-btn">Gerar Relatório para Baixar</button>
+        <button id="generate-report-btn" class="tertiary-btn">
+          Gerar Relatório para Baixar
+        </button>
+      </div>
+
+      <div class="card about-card">
+        <h2 class="card-title">Sobre o Criador</h2>
+        <div class="creator-info">
+          <img
+            src="https://avatars.githubusercontent.com/u/84990977?v=4"
+            alt="Foto do Criador"
+            class="creator-photo"
+          />
+          <div class="creator-details">
+            <p class="creator-name">Francisco Ruan Gomes Damasceno</p>
+            <p class="creator-bio">
+              Estudante de Engenharia de Computação na UFC e desenvolvedor.
+            </p>
+            <a
+              href="https://github.com/Ruanggd123"
+              target="_blank"
+              class="creator-link"
+              >GitHub</a
+            >
+            <a
+              href="https://www.linkedin.com/in/ruan-gomes-b68453229/"
+              target="_blank"
+              class="creator-link"
+              >LinkedIn</a
+            >
+          </div>
+        </div>
       </div>
     </main>
 
-    <div id="delete-modal-overlay" class="hidden">
+    <footer class="footer-copyright">
+      &copy; 2025 Lista Diária. Todos os direitos reservados.
+    </footer>
+
+    <div id="delete-modal-overlay" class="hidden modal-overlay">
       <div class="modal-content">
         <h3>Confirmar Exclusão</h3>
         <p>Insira o código de administrador para deletar este nome.</p>
@@ -71,51 +133,49 @@
           placeholder="Código de Administrador"
         />
         <div class="modal-actions">
-          <button id="cancel-delete-btn">Cancelar</button>
-          <button id="confirm-delete-btn">Deletar</button>
+          <button id="cancel-delete-btn" class="secondary-btn">Cancelar</button>
+          <button id="confirm-delete-btn" class="danger-btn">Deletar</button>
         </div>
       </div>
     </div>
 
-    <div id="report-modal-overlay" class="hidden">
+    <div id="report-modal-overlay" class="hidden modal-overlay">
       <div class="modal-content">
         <h3>Gerar Relatório para Download</h3>
         <p>
           Escolha o tipo de relatório e insira o código para baixar o arquivo.
         </p>
-
-        <div class="report-options" style="margin: 15px 0; text-align: left">
-          <input
-            type="radio"
-            id="report-type-subir"
-            name="reportType"
-            value="subir"
-            checked
-          />
-          <label for="report-type-subir" style="cursor: pointer"
-            >Lista de Subida</label
-          >
-          <br />
-          <input
-            type="radio"
-            id="report-type-descer"
-            name="reportType"
-            value="descer"
-            style="margin-top: 5px"
-          />
-          <label for="report-type-descer" style="cursor: pointer"
-            >Lista de Descida</label
-          >
+        <div class="report-options">
+          <label class="radio-label">
+            <input
+              type="radio"
+              id="report-type-subir"
+              name="reportType"
+              value="subir"
+              checked
+            />
+            Lista de Subida
+          </label>
+          <label class="radio-label">
+            <input
+              type="radio"
+              id="report-type-descer"
+              name="reportType"
+              value="descer"
+            />
+            Lista de Descida
+          </label>
         </div>
-
         <input
           type="password"
           id="report-admin-code-input"
           placeholder="Código de Administrador"
         />
         <div class="modal-actions">
-          <button id="cancel-report-btn">Cancelar</button>
-          <button id="confirm-report-btn">Baixar Agora</button>
+          <button id="cancel-report-btn" class="secondary-btn">Cancelar</button>
+          <button id="confirm-report-btn" class="success-btn">
+            Baixar Agora
+          </button>
         </div>
       </div>
     </div>
