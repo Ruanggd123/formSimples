@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const message = document.getElementById("message");
   const submitButton = document.getElementById("submitButton");
   const listaNomesDiv = document.getElementById("listaNomes");
-  const totalNomesSpan = 0;
+  const totalNomesSpan = document.getElementById("totalNomes");
   const subirCountSpan = document.getElementById("subirCount");
   const descerCountSpan = document.getElementById("descerCount");
 
