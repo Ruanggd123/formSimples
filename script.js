@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // !! ATUALIZE AQUI COM A URL DO SEU DEPLOY (confirme que é a mais recente) !!
   const SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbyslFGbdD_dwsx693RvfULTH3PAPv-MdOzEREjVd2n0v49C1WOReNiYhdXn91Doe4HE/exec";
-  const LIST_LIMIT = 46;
+  const LIST_LIMIT = 43;
 
   // DOM
   const form = document.getElementById("nameForm");
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function checkTime() {
     const now = new Date();
     const hour = now.getHours();
-    const isOpen = hour >= 13 && hour < 21;
+    const isOpen = hour >= 10 && hour < 21;
     if (isOpen) {
       form.classList.remove("hidden");
       closedMessage.classList.add("hidden");
