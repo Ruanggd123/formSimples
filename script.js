@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // !! ATUALIZE AQUI COM A URL DO SEU DEPLOY (confirme que é a mais recente) !!
   const SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbyslFGbdD_dwsx693RvfULTH3PAPv-MdOzEREjVd2n0v49C1WOReNiYhdXn91Doe4HE/exec";
+    "https://script.google.com/macros/s/AKfycbzSGjOMJ7jJQMf5Rtfjo20rcALrVR1Z2sKj4SWxrBG7qBAjnjZMapie_2e5Ni8qWJaR/exec";
   const LIST_LIMIT = 43;
 
   // DOM
@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const message = document.getElementById("message");
   const submitButton = document.getElementById("submitButton");
   const listaNomesDiv = document.getElementById("listaNomes");
-  const totalNomesSpan = document.getElementById("totalNomes");
+  const totalNomesSpan = 0;
   const subirCountSpan = document.getElementById("subirCount");
   const descerCountSpan = document.getElementById("descerCount");
 
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function checkTime() {
     const now = new Date();
     const hour = now.getHours();
-    const isOpen = hour >= 10 && hour < 21;
+    const isOpen = hour >= 10 && hour < 22;
     if (isOpen) {
       form.classList.remove("hidden");
       closedMessage.classList.add("hidden");
